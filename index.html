@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promo Generator</title>
+    <style>
+        /* CSS styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1f1f1f;
+            color: #fff;
+        }
+
+        /* Rest of your CSS styles... */
+
+    </style>
+</head>
+
+<body>
+    <!-- HTML content -->
+    <h1>Discord Promo Generator</h1>
+    <label for="numCodes">Number of Codes (1000000 max):</label>
+    <input type="number" id="numCodes" min="100" max="100" value="100">
+    <p id="count">Codes generated: 0</p>
+    <div id="output-container">
+        <textarea id="output" readonly></textarea>
+    </div>
+
+    <script>
+        // JavaScript logic
+        let generatedCount = 0; // Initialize count
+
+        function generateCode() {
+            const outputTextarea = document.getElementById('output');
+            const numCodesInput = document.getElementById('numCodes');
+
+            const numCodes = Math.min(1000000, Math.max(100, parseInt(numCodesInput.value))); // Cap at 1000000
+
+            if (generatedCount >= numCodes) {
+                saveCodes(outputTextarea.value);
+                return;
+            }
+
+            const partnerUserId = generateUniqueId();
+            const data = {
+                partnerUserId: partnerUserId
+            };
+
+            fetch('https://cors-anywhere-web.up.railway.app/https://api.discord.gx.games/v1/direct-fulfillment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Sec-Ch-Ua': '"Opera GX";v="105", "Chromium";v="119", "Not?A_Brand";v="24"',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 OPR/105.0.0.0'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        throw new Error(`Request failed with status: ${response.status}`);
+                    }
+                })
+                .then(json => {
+                    const token = json.token;
+                    if (token) {
+                        const promoLink = `https://discord.com/billing/partner-promotions/1180231712274387115/${token}`;
+                        outputTextarea.value += `${promoLink}\n`;
+                        generatedCount++;
+                        document.getElementById('count').textContent = `Codes generated: ${generatedCount}`;
+
+                        if (generatedCount % 100 === 0 && generatedCount > 0) {
+                            setTimeout(() => {
+                                saveCodes(outputTextarea.value);
+                                location.reload(); // Refresh page after every 50 codes with a delay
+                            }, 20000); // 10-second delay
+                        } else {
+                            generateCode(); // Generate the next code
+                        }
+                    }
+                })
+                .catch(error => console.error(error));
+        }
+
+        function generateUniqueId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0,
+                    v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function saveCodes(codes) {
+            const blob = new Blob([codes], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Codes.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        generateCode(); // Start generating codes
+    </script>
+</body>
+
+</html>
