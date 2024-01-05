@@ -28,7 +28,7 @@
     <!-- HTML content -->
     <h1>Discord Promo Generator</h1>
     <label for="numCodes">Number of Codes (1000000 max):</label>
-    <input type="number" id="numCodes" min="100" max="100" value="100">
+    <input type="number" id="numCodes" min="100" max="10000" value="100">
     <p id="count">Codes generated: 0</p>
     <div id="output-container">
         <textarea id="output" readonly></textarea>
@@ -82,7 +82,7 @@
                             setTimeout(() => {
                                 saveCodes(outputTextarea.value);
                                 location.reload(); // Refresh page after every 50 codes with a delay
-                            }, 20000); // 10-second delay
+                            }, 0); // 10-second delay
                         } else {
                             generateCode(); // Generate the next code
                         }
